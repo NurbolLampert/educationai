@@ -5,7 +5,7 @@
   "type" : "module",
   "main": "index.js",
   "scripts": {
-    "dev": "node script.js"
+    "dev": "node script.mjs"
   },
   "keywords": [],
   "author": "",
