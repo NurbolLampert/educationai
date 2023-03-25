@@ -1,0 +1,2 @@
+# educationai
+Hackathon Education prompt
