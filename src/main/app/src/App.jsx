@@ -2,42 +2,51 @@ import { useState } from 'react';
 import './App.css';
 import styles from './Quiz.module.css';
 
-const API_KEY = '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';
+const API_KEY = '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';
 const systemMessage = {
   role: 'system',
-  content: 'The user is a middle schooler. Check if the provided answers are correct and if it is, say "Correct!" or "Good Job! or something like that and if it is wrong, explain the calculations in 3 sentences. Then if the user gets the next question correct, increase the difficulty for the next question, but if the user gets the previous question wrong, decrease the difficulty of the question',
+  content: 'I am an 8 year old elementary student and I am taking a 10 question math quiz. Go through each question and my response and display the grade out of 10. If I got the question right display good job, and for each question if I got it wrong explain each question how to get the answer to me as an 8 year old kid. After that generate 10 math quiz questions that would help me improve my skills',
 };
 
-function App() {
-  const [userAnswer, setUserAnswer] = useState('');
-  const [chatGPTResponse, setChatGPTResponse] = useState(null);
-  const [question, setQuestion] = useState(generateQuestion());
-  const [showResults, setShowResults] = useState(false);
 
-  function generateQuestion() {
-    const num1 = Math.floor(Math.random() * 100);
-    const num2 = Math.floor(Math.random() * 100);
-    const operator = Math.random() > 0.5 ? '+' : '-';
-    return `${num1} ${operator} ${num2}`;
+function App() {
+  const [userAnswers, setUserAnswers] = useState(Array(10).fill(''));
+  const [chatGPTResponse, setChatGPTResponse] = useState(null);
+  const [questions, setQuestions] = useState(generateQuestions(10));
+  const [isFormValid, setIsFormValid] = useState(false);
+
+
+  function generateQuestions(count) {
+    return Array.from({ length: count }, () => {
+      const num1 = Math.floor(Math.random() * 100) + 1;
+      const num2 = Math.floor(Math.random() * 100) + 1;
+      const operators = ['+', '-', '*', '/'];
+      const operator = operators[Math.floor(Math.random() * operators.length)];
+  
+      if (operator === '/') {
+        // Ensure the division result is an integer
+        return `${num1 * num2} ${operator} ${num2}`;
+      }
+      
+      return `${num1} ${operator} ${num2}`;
+    });
   }
 
-  const handleSend = async (answer) => {
-    setUserAnswer(answer);
-    const newMessages = [
+  const handleSend = async () => {
+    const newMessages = questions.map((question, index) => [
       {
-        message: `Question: ${question}`,
+        message: `Question ${index + 1}: ${question}`,
         direction: 'outgoing',
         sender: 'user',
       },
       {
-        message: `Answer: ${answer}`,
+        message: `Answer ${index + 1}: ${userAnswers[index]}`,
         direction: 'outgoing',
         sender: 'user',
       },
-    ];
+    ]).flat();
 
     await processMessageToChatGPT(newMessages);
-    setShowResults(true);
   };
 
   async function processMessageToChatGPT(chatMessages) {
@@ -73,37 +82,47 @@ function App() {
       });
   }
 
+  const checkFormValidity = () => {
+    const allAnswersProvided = userAnswers.every((answer) => answer.trim() !== '');
+    setIsFormValid(allAnswersProvided);
+  };
+
   return (
     <div className={styles.App}>
-        <header className="header">EducationIA</header>      <div className={styles.formContainer}>
+      <header className="header">EducationIA</header>
+      <div className={styles.formContainer}>
         <h2 className={styles.quizTitle}>Math Quiz</h2>
-        <p className={styles.question}>{question}</p>
-        {!chatGPTResponse && (
-          <div className={styles.inputContainer}>
+        {questions.map((question, index) => (
+          <div key={index} className={styles.questionContainer}>
+            <p className={styles.question}>
+              {index + 1}. {question}
+            </p>
+            <div className={styles.inputContainer}>
             <input
-              className={styles.answerInput}
-              type="text"
-              placeholder="Type your answer here"
-              onKeyDown={(e) => {
-                if (e.key === 'Submit' && e.target.value.trim()) {
-                  handleSend(e.target.value);
-                  e.target.value = '';
-                }
-              }}
-            />
-            <button
-              className={styles.submitButton}
-              onClick={() => {
-                const input = document.querySelector('input');
-                if (input.value.trim()) {
-                  handleSend(input.value);
-                  input.value = '';
-                }
-              }}
-            >
-              Submit
-            </button>
+                className={styles.answerInput}
+                type="text"
+                placeholder="Type your answer here"
+                value={userAnswers[index]}
+                onChange={(e) => {
+                  let updatedAnswers = [...userAnswers];
+                  updatedAnswers[index] = e.target.value;
+                  setUserAnswers(updatedAnswers);
+                  checkFormValidity();
+                }}
+              />
+            </div>
           </div>
+        ))}
+        {!chatGPTResponse && (
+          <button
+            className={styles.submitButton}
+            onClick={() => {
+              handleSend();
+            }}
+            disabled={!isFormValid}
+          >
+            Submit All Answers
+          </button>
         )}
         {chatGPTResponse && (
           <div className={styles.output}>
@@ -112,10 +131,11 @@ function App() {
               className={styles.nextQuestionButton}
               onClick={() => {
                 setChatGPTResponse(null);
-                setQuestion(generateQuestion());
+                setQuestions(generateQuestions(10));
+                setUserAnswers(Array(10).fill(''));
               }}
             >
-              Next Question
+              Retry Quiz
             </button>
           </div>
         )}
@@ -126,3 +146,4 @@ function App() {
 }
 
 export default App;
+
