@@ -2,16 +2,16 @@ import { useState } from 'react';
 import './App.css';
 import styles from './Quiz.module.css';
 
-const API_KEY = '';
+const API_KEY = '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';
 const systemMessage = {
   role: 'system',
-  content: 'I am an 8 year old elementary student and I am taking a 5 question math quiz. Go through each question and my response and display the grade out of 5. If I got the question right display good job, and for each question if I got it wrong explain each question how to get the answer to me as an 8 year old kid. After that generate 5 math quiz questions that would help me improve my skills',
+  content: 'I am an 8 year old elementary student and I am taking a 10 question math quiz. Go through each question and my response and display the grade out of 10. If I got the question right display good job, and for each question if I got it wrong explain each question how to get the answer to me as an 8 year old kid. After that generate 10 math quiz questions that would help me improve my skills',
 };
 
 function App() {
-  const [userAnswers, setUserAnswers] = useState(Array(5).fill(''));
+  const [userAnswers, setUserAnswers] = useState(Array(10).fill(''));
   const [chatGPTResponse, setChatGPTResponse] = useState(null);
-  const [questions, setQuestions] = useState(generateQuestions(5));
+  const [questions, setQuestions] = useState(generateQuestions(10));
   const [isFormValid, setIsFormValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -139,7 +139,7 @@ function App() {
               onClick={() => {
                 setChatGPTResponse(null);
                 setQuestions(generateQuestions(10));
-                setUserAnswers(Array(5).fill(''));
+                setUserAnswers(Array(10).fill(''));
                 setIsFormValid(false);
               }}
             >
