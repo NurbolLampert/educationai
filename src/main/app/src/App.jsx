@@ -1,108 +1,124 @@
-import { useState } from 'react'
-import './App.css'
-import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
-import { MainContainer, ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
+import { useState } from 'react';
+import './App.css';
 
-const API_KEY = "";
-// "Explain things like you would to a 10 year old learning how to code."
-const systemMessage = { //  Explain things like you're talking to a software professional with 5 years of experience.
-  "role": "system", "content": "Explain things like you're talking to a software professional with 2 years of experience."
-}
+const API_KEY = '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';
+const systemMessage = {
+  role: 'system',
+  content: 'Evaluate the given math problem and check if the provided answer is correct.',
+};
+
 
 function App() {
-  const [messages, setMessages] = useState([
-    {
-      message: "Hello, I'm ChatGPT! Ask me anything!",
-      sentTime: "just now",
-      sender: "ChatGPT"
-    }
-  ]);
-  const [isTyping, setIsTyping] = useState(false);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [chatGPTResponse, setChatGPTResponse] = useState(null);
+  const [question, setQuestion] = useState(generateQuestion());
 
-  const handleSend = async (message) => {
-    const newMessage = {
-      message,
-      direction: 'outgoing',
-      sender: "user"
-    };
+  function generateQuestion() {
+    const num1 = Math.floor(Math.random() * 100);
+    const num2 = Math.floor(Math.random() * 100);
+    const operator = Math.random() > 0.5 ? '+' : '-';
+    return `${num1} ${operator} ${num2}`;
+  }
 
-    const newMessages = [...messages, newMessage];
-    
-    setMessages(newMessages);
+  const handleSend = async (answer) => {
+    setUserAnswer(answer);
+    const newMessages = [
+      {
+        message: `Question: ${question}`,
+        direction: 'outgoing',
+        sender: 'user',
+      },
+      {
+        message: `Answer: ${answer}`,
+        direction: 'outgoing',
+        sender: 'user',
+      },
+    ];
 
-    // Initial system message to determine ChatGPT functionality
-    // How it responds, how it talks, etc.
-    setIsTyping(true);
     await processMessageToChatGPT(newMessages);
   };
 
-  async function processMessageToChatGPT(chatMessages) { // messages is an array of messages
-    // Format messages for chatGPT API
-    // API is expecting objects in format of { role: "user" or "assistant", "content": "message here"}
-    // So we need to reformat
-
+  async function processMessageToChatGPT(chatMessages) {
     let apiMessages = chatMessages.map((messageObject) => {
-      let role = "";
-      if (messageObject.sender === "ChatGPT") {
-        role = "assistant";
+      let role = '';
+      if (messageObject.sender === 'ChatGPT') {
+        role = 'assistant';
       } else {
-        role = "user";
+        role = 'user';
       }
-      return { role: role, content: messageObject.message}
+      return { role: role, content: messageObject.message };
     });
 
-
-    // Get the request body set up with the model we plan to use
-    // and the messages which we formatted above. We add a system message in the front to'
-    // determine how we want chatGPT to act. 
     const apiRequestBody = {
-      "model": "gpt-3.5-turbo",
-      "messages": [
-        systemMessage,  // The system message DEFINES the logic of our chatGPT
-        ...apiMessages // The messages from our chat with ChatGPT
-      ]
-    }
+      model: 'gpt-3.5-turbo',
+      messages: [systemMessage, ...apiMessages],
+    };
 
-    await fetch("https://api.openai.com/v1/chat/completions", 
-    {
-      method: "POST",
+    await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
       headers: {
-        "Authorization": "Bearer " + API_KEY,
-        "Content-Type": "application/json"
+        Authorization: 'Bearer ' + API_KEY,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(apiRequestBody)
-    }).then((data) => {
-      return data.json();
-    }).then((data) => {
-      console.log(data);
-      setMessages([...chatMessages, {
-        message: data.choices[0].message.content,
-        sender: "ChatGPT"
-      }]);
-      setIsTyping(false);
-    });
+      body: JSON.stringify(apiRequestBody),
+    })
+      .then((data) => {
+        return data.json();
+      })
+      .then((data) => {
+        console.log(data);
+        setChatGPTResponse(data.choices[0].message.content);
+      });
   }
 
   return (
     <div className="App">
-      <div style={{ position:"relative", height: "800px", width: "700px"  }}>
-        <MainContainer>
-          <ChatContainer>       
-            <MessageList 
-              scrollBehavior="smooth" 
-              typingIndicator={isTyping ? <TypingIndicator content="ChatGPT is typing" /> : null}
+      <div className="form-container">
+        <h2>Math Quiz</h2>
+        <p>{question}</p>
+        {!chatGPTResponse && (
+          <div>
+            <input
+              type="text"
+              placeholder="Type your answer here"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.target.value.trim()) {
+                  handleSend(e.target.value);
+                  e.target.value = '';
+                }
+              }}
+            />
+            <button
+              onClick={() => {
+                const input = document.querySelector('input');
+                if (input.value.trim()) {
+                  handleSend(input.value);
+                  input.value = '';
+                }
+              }}
             >
-              {messages.map((message, i) => {
-                console.log(message)
-                return <Message key={i} model={message} />
-              })}
-            </MessageList>
-            <MessageInput placeholder="Type message here" onSend={handleSend} />        
-          </ChatContainer>
-        </MainContainer>
+              Submit
+            </button>
+          </div>
+        )}
+        {chatGPTResponse && (
+          <div className="output">
+            <p>ChatGPT: {chatGPTResponse}</p>
+            <button
+              onClick={() => {
+                setChatGPTResponse(null);
+                setQuestion(generateQuestion());
+              }}
+            >
+              Next Question
+            </button>
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
+  
+    
 }
 
-export default App
+export default App;
