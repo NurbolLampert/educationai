@@ -149,7 +149,7 @@ function App() {
           </div>
         )}
       </div>
-      <footer className="footer">EducationIA</footer>
+      <footer className="footer">Pledge: I pledge that I have neither given nor recieved any help on this Quiz.</footer>
     </div>
   );
   
