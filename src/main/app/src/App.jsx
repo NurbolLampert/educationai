@@ -8,7 +8,6 @@ const systemMessage = {
   content: 'I am an 8 year old elementary student and I am taking a 10 question math quiz. Go through each question and my response and display the grade out of 10. If I got the question right display good job, and for each question if I got it wrong explain each question how to get the answer to me as an 8 year old kid. After that generate 10 math quiz questions that would help me improve my skills',
 };
 
-
 function App() {
   const [userAnswers, setUserAnswers] = useState(Array(10).fill(''));
   const [chatGPTResponse, setChatGPTResponse] = useState(null);
@@ -92,7 +91,7 @@ function App() {
 
   return (
     <div className={styles.App}>
-      <header className="header">EducationIA</header>
+      <header className="header">EducationAI</header>
       <div className={styles.formContainer}>
         <h2 className={styles.quizTitle}>Math Quiz</h2>
         {questions.map((question, index) => (
