@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import './App.css';
+import styles from './Quiz.module.css';
 
-const API_KEY = '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';
+const API_KEY = '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';
 const systemMessage = {
   role: 'system',
-  content: 'Evaluate the given math problem and check if the provided answer is correct.',
+  content: 'The user is a middle schooler. Check if the provided answers are correct and if it is, say "Correct!" or "Good Job! or something like that and if it is wrong, explain the calculations in 3 sentences. Then if the user gets the next question correct, increase the difficulty for the next question, but if the user gets the previous question wrong, decrease the difficulty of the question',
 };
-
 
 function App() {
   const [userAnswer, setUserAnswer] = useState('');
   const [chatGPTResponse, setChatGPTResponse] = useState(null);
   const [question, setQuestion] = useState(generateQuestion());
+  const [showResults, setShowResults] = useState(false);
 
   function generateQuestion() {
     const num1 = Math.floor(Math.random() * 100);
@@ -36,6 +37,7 @@ function App() {
     ];
 
     await processMessageToChatGPT(newMessages);
+    setShowResults(true);
   };
 
   async function processMessageToChatGPT(chatMessages) {
@@ -72,23 +74,25 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <div className="form-container">
-        <h2>Math Quiz</h2>
-        <p>{question}</p>
+    <div className={styles.App}>
+        <header className="header">EducationIA</header>      <div className={styles.formContainer}>
+        <h2 className={styles.quizTitle}>Math Quiz</h2>
+        <p className={styles.question}>{question}</p>
         {!chatGPTResponse && (
-          <div>
+          <div className={styles.inputContainer}>
             <input
+              className={styles.answerInput}
               type="text"
               placeholder="Type your answer here"
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.target.value.trim()) {
+                if (e.key === 'Submit' && e.target.value.trim()) {
                   handleSend(e.target.value);
                   e.target.value = '';
                 }
               }}
             />
             <button
+              className={styles.submitButton}
               onClick={() => {
                 const input = document.querySelector('input');
                 if (input.value.trim()) {
@@ -102,9 +106,10 @@ function App() {
           </div>
         )}
         {chatGPTResponse && (
-          <div className="output">
-            <p>ChatGPT: {chatGPTResponse}</p>
+          <div className={styles.output}>
+            <p className={styles.chatGPTResponse}>{chatGPTResponse}</p>
             <button
+              className={styles.nextQuestionButton}
               onClick={() => {
                 setChatGPTResponse(null);
                 setQuestion(generateQuestion());
@@ -115,10 +120,9 @@ function App() {
           </div>
         )}
       </div>
+      <footer className="footer">EducationIA</footer>
     </div>
   );
-  
-    
 }
 
 export default App;
