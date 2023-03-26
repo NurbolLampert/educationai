@@ -75,7 +75,8 @@ function App() {
 
   return (
     <div className={styles.App}>
-        <header className="header">EducationIA</header>      <div className={styles.formContainer}>
+        <header className="header">EducationIA</header>      
+        <div className={styles.formContainer}>
         <h2 className={styles.quizTitle}>Math Quiz</h2>
         <p className={styles.question}>{question}</p>
         {!chatGPTResponse && (
