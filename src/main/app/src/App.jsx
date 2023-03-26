@@ -8,6 +8,7 @@ const systemMessage = {
   content: 'The user is a middle schooler. Check if the provided answers are correct and if it is, say "Correct!" or "Good Job! or something like that and if it is wrong, explain the calculations in 3 sentences. Then if the user gets the next question correct, increase the difficulty for the next question, but if the user gets the previous question wrong, decrease the difficulty of the question',
 };
 
+
 function App() {
   const [userAnswer, setUserAnswer] = useState('');
   const [chatGPTResponse, setChatGPTResponse] = useState(null);
