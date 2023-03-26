@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import styles from './Quiz.module.css';
 
-const API_KEY = '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';
+const API_KEY = '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';
 const systemMessage = {
   role: 'system',
   content: 'I am an 8 year old elementary student and I am taking a 10 question math quiz. Go through each question and my response and display the grade out of 10. If I got the question right display good job, and for each question if I got it wrong explain each question how to get the answer to me as an 8 year old kid. After that generate 10 math quiz questions that would help me improve my skills',
@@ -14,6 +14,7 @@ function App() {
   const [chatGPTResponse, setChatGPTResponse] = useState(null);
   const [questions, setQuestions] = useState(generateQuestions(10));
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
 
   function generateQuestions(count) {
@@ -33,6 +34,7 @@ function App() {
   }
 
   const handleSend = async () => {
+    setIsLoading(true);
     const newMessages = questions.map((question, index) => [
       {
         message: `Question ${index + 1}: ${question}`,
@@ -79,6 +81,7 @@ function App() {
       .then((data) => {
         console.log(data);
         setChatGPTResponse(data.choices[0].message.content);
+        setIsLoading(false);
       });
   }
 
@@ -93,12 +96,12 @@ function App() {
       <div className={styles.formContainer}>
         <h2 className={styles.quizTitle}>Math Quiz</h2>
         {questions.map((question, index) => (
-          <div key={index} className={styles.questionContainer}>
+          <div key={index}>
             <p className={styles.question}>
               {index + 1}. {question}
             </p>
             <div className={styles.inputContainer}>
-            <input
+              <input
                 className={styles.answerInput}
                 type="text"
                 placeholder="Type your answer here"
@@ -124,6 +127,11 @@ function App() {
             Submit All Answers
           </button>
         )}
+        {isLoading && (
+          <div className={styles.loading}>
+            <p>Processing your answers, please wait...</p>
+          </div>
+        )}
         {chatGPTResponse && (
           <div className={styles.output}>
             <p className={styles.chatGPTResponse}>{chatGPTResponse}</p>
@@ -133,6 +141,7 @@ function App() {
                 setChatGPTResponse(null);
                 setQuestions(generateQuestions(10));
                 setUserAnswers(Array(10).fill(''));
+                setIsFormValid(false);
               }}
             >
               Retry Quiz
@@ -143,6 +152,7 @@ function App() {
       <footer className="footer">EducationIA</footer>
     </div>
   );
+  
 }
 
 export default App;
